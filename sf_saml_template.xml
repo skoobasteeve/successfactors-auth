@@ -1,0 +1,42 @@
+<saml2:Assertion
+IssueInstant="{issue_instant}" Version="2.0"
+xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
+xmlns:xs="http://www.w3.org/2001/XMLSchema"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <saml2:Issuer>{client_id}</saml2:Issuer>
+  <saml2:Subject>
+    <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">{user_id}</saml2:NameID>
+    <saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+
+      <saml2:SubjectConfirmationData NotOnOrAfter="{not_valid_after}"
+      Recipient="{sf_root_url}/odata/v2" />
+    </saml2:SubjectConfirmation>
+  </saml2:Subject>
+  <saml2:Conditions NotBefore="{not_valid_before}"
+  NotOnOrAfter="{not_valid_after}">
+    <saml2:AudienceRestriction>
+      <saml2:Audience>{audience}</saml2:Audience>
+    </saml2:AudienceRestriction>
+  </saml2:Conditions>
+  <saml2:AuthnStatement AuthnInstant="{issue_instant}"
+  SessionIndex="{session_id}">
+    <saml2:AuthnContext>
+      <saml2:AuthnContextClassRef>
+      urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml2:AuthnContextClassRef>
+    </saml2:AuthnContext>
+  </saml2:AuthnStatement>
+  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+    <SignedInfo>
+      <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+      <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+      <Reference URI="">
+        <Transforms>
+          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+        </Transforms>
+        <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <DigestValue></DigestValue>
+      </Reference>
+    </SignedInfo>
+    <SignatureValue/>
+  </Signature>
+</saml2:Assertion>

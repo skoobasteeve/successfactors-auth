@@ -1,45 +1,48 @@
 #!/usr/bin/env python3
 
+'''
+Authenticates to the SuccessFactors API using OAuth2 with a SAML 2.0
+grant type. A SAML assertion is generated using a local template file,
+then signed with a private key file before being encoded in base64 and
+sent to the API via a POST request. This script is designed to be imported
+into other Python scripts, which can call the auth() function to get a
+Bearer token.
+
+Derived from: https://github.com/mtrdesign/python-saml-example
+
+This script requires the following additional files:
+-Private key file for a previously created SuccessFactors OAuth2 application
+
+Required packages:
+pip install requests lxml xmlsec
+
+Example:
+#!/usr/bin/env python3
+
+import sf_auth
+
+token = sf_auth.auth(
+            SF_URL,
+            SF_COMPANY_ID,
+            SF_OAUTH_CLIENT_ID,
+            SF_ADMIN_USER,
+            SF_OAUTH_PRIVATE_KEY_FILE,
+        )
+'''
+
 import base64
-import json
-import sys
-import os
 import requests
 import xmlsec
-import boto3
+import importlib.resources
 from lxml import etree
 from datetime import datetime, timedelta
 
 
-region = os.environ.get('AWS_REGION')
-secret_id= os.environ.get('SECRET_ID')
-template_file = 'sf_saml_template.xml'
-private_keyfile = '/tmp/successfactors-private.pem'
-
-def get_secret(region, secret_name, session):
-
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region
-    )
-
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-
-        if 'SecretString' in get_secret_value_response:
-            secret = get_secret_value_response['SecretString']
-
-    except Exception as x:
-        print(x)
-        sys.exit(1)
-
-    return secret
-
-
+# Send POST request to SuccessFactors containing the generated
+# SAML assertion and other details, then receive a token in response
 def get_access_token(sf_url, company_id, client_id, assertion):
 
+    # Request body
     token_request = dict(
         client_id=client_id,
         company_id=company_id,
@@ -51,7 +54,9 @@ def get_access_token(sf_url, company_id, client_id, assertion):
     return token_data['access_token']
 
 
+# Generate SAML assertion from the template XML
 def generate_assertion(sf_root_url, user_id, client_id, template_file):
+    # Calculate valid time values for the assertion's validity
     issue_instant = datetime.utcnow()
     auth_instant = issue_instant
     not_valid_before = issue_instant - timedelta(minutes=10)
@@ -59,6 +64,7 @@ def generate_assertion(sf_root_url, user_id, client_id, template_file):
 
     audience = 'www.successfactors.com'
 
+    # Define values to fill in the template with
     context = dict(
         issue_instant=issue_instant.isoformat(),
         auth_instant=auth_instant.isoformat(),
@@ -70,70 +76,52 @@ def generate_assertion(sf_root_url, user_id, client_id, template_file):
         client_id=client_id,
         session_id='mock_session_index',
     )
+    # Open the template file
     saml_template = open(template_file).read()
 
+    # Fill the values into the template and return in
     return saml_template.format(**context)
 
 
+# Sign the SAML assertion using a private key file
 def sign_assertion(xml_string, private_key):
+    # Import key file
     key = xmlsec.Key.from_file(private_key, xmlsec.KeyFormat.PEM)
 
+    # Find space in the SAML assertion XML to fill in the signature
     root = etree.fromstring(xml_string)
     signature_node = xmlsec.tree.find_node(root, xmlsec.Node.SIGNATURE)
 
+    # Sign the XML
     sign_context = xmlsec.SignatureContext()
     sign_context.key = key
     sign_context.sign(signature_node)
 
+    # Return signed XML string
     return etree.tostring(root)
 
 
 def auth(sf_url, sf_company_id, sf_oauth_client_id,
-         sf_admin_user, sf_saml_private_key, template_file):
+         sf_admin_user, sf_saml_private_key):
 
+    template_file = "sf_saml_template.xml"
+
+    # Generate SAML assertion XML from template file
     unsigned_assertion = generate_assertion(sf_url,
                                             sf_admin_user,
                                             sf_oauth_client_id,
                                             template_file)
 
+    # Sign the SAML assertion with the private key file
     signed_assertion = sign_assertion(unsigned_assertion, sf_saml_private_key)
+
+    # Convert the signed XML string to base64
     signed_assertion_b64 = base64.b64encode(signed_assertion).replace(b'\n', b'')
+
+    # Request the API token from SuccessFactors via a POST request
     access_token = get_access_token(sf_url,
                                     sf_company_id,
                                     sf_oauth_client_id,
                                     signed_assertion_b64)
 
     return access_token
-
-
-def lambda_handler(event, context):
-
-    session = boto3.session.Session()
-
-    print(event)
-
-    if event['rawPath'] == '/token':
-        body = json.loads(event['body'])
-        sf_url = body['odata_url']
-        sf_company_id = body['company_id']
-        sf_oauth_client_id = body['oauth_client_id']
-        sf_admin_user = body['admin_user']
-
-        private_key = get_secret(region,
-                                 secret_id,
-                                 session)
-
-        with open(private_keyfile, 'w') as f:
-            f.write(private_key)
-
-        token = auth(sf_url, sf_company_id, sf_oauth_client_id, sf_admin_user,
-                     private_keyfile, template_file)
-
-        payload = {
-            "token": token
-        }
-
-        return {
-            'statusCode': 200,
-            'body': json.dumps(payload)
-        }

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "successfactors_auth"
+version = "0.0.5"
+authors = [
+  { name="Ray Lyon", email="ray@raylyon.net" },
+]
+description = "Authenticate to the SuccessFactors API."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/skoobasteeve/successfactors_auth"
+"Bug Tracker" = "https://github.com/skoobasteeve/successfactors_auth/issues"

@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "successfactors_auth"
-version = "0.0.5"
+name = "successfactors-auth"
+version = "0.0.8"
 authors = [
   { name="Ray Lyon", email="ray@raylyon.net" },
 ]
@@ -15,6 +15,11 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
+]
+dependencies = [
+  "requests",
+  "lxml",
+  "xmlsec",
 ]
 
 [project.urls]

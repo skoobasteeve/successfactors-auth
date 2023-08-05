@@ -33,9 +33,11 @@ token = sf_auth.auth(
 import base64
 import requests
 import xmlsec
-import importlib.resources
 from lxml import etree
 from datetime import datetime, timedelta
+from importlib import resources as impresources
+
+from . import templates
 
 
 # Send POST request to SuccessFactors containing the generated
@@ -104,7 +106,7 @@ def sign_assertion(xml_string, private_key):
 def auth(sf_url, sf_company_id, sf_oauth_client_id,
          sf_admin_user, sf_saml_private_key):
 
-    template_file = "sf_saml_template.xml"
+    template_file = (impresources.files(templates) / 'sf_saml_template.xml')
 
     # Generate SAML assertion XML from template file
     unsigned_assertion = generate_assertion(sf_url,

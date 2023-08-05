@@ -10,18 +10,20 @@ Bearer token.
 
 Derived from: https://github.com/mtrdesign/python-saml-example
 
-This script requires the following additional files:
+This module requires the following additional files:
 -Private key file for a previously created SuccessFactors OAuth2 application
 
 Required packages:
-pip install requests lxml xmlsec
+requests
+lxml
+xmlsec
 
 Example:
 #!/usr/bin/env python3
 
-import sf_auth
+import successfactors_auth
 
-token = sf_auth.auth(
+token = successfactors_auth.auth(
             SF_URL,
             SF_COMPANY_ID,
             SF_OAUTH_CLIENT_ID,
@@ -31,19 +33,21 @@ token = sf_auth.auth(
 '''
 
 import base64
+from datetime import datetime, timedelta
+from importlib import resources as impresources
 import requests
 import xmlsec
 from lxml import etree
-from datetime import datetime, timedelta
-from importlib import resources as impresources
 
 from . import templates
 
 
-# Send POST request to SuccessFactors containing the generated
-# SAML assertion and other details, then receive a token in response
-def get_access_token(sf_url, company_id, client_id, assertion):
-
+def get_access_token(sf_url: str, company_id: str, client_id: str,
+                     assertion: str) -> str:
+    """
+    Send POST request to SuccessFactors containing the generated
+    SAML assertion and other details, then receive a token in response
+    """
     # Request body
     token_request = dict(
         client_id=client_id,
@@ -51,13 +55,17 @@ def get_access_token(sf_url, company_id, client_id, assertion):
         grant_type='urn:ietf:params:oauth:grant-type:saml2-bearer',
         assertion=assertion
     )
-    response = requests.post(f"{sf_url}/oauth/token", data=token_request)
+    response = requests.post(f"{sf_url}/oauth/token", data=token_request,
+                             timeout=15)
     token_data = response.json()
     return token_data['access_token']
 
 
-# Generate SAML assertion from the template XML
-def generate_assertion(sf_root_url, user_id, client_id, template_file):
+def generate_assertion(sf_root_url: str, user_id: str, client_id: str,
+                       template_file: str) -> str:
+    """
+    Generate SAML assertion from the template XML
+    """
     # Calculate valid time values for the assertion's validity
     issue_instant = datetime.utcnow()
     auth_instant = issue_instant
@@ -79,14 +87,16 @@ def generate_assertion(sf_root_url, user_id, client_id, template_file):
         session_id='mock_session_index',
     )
     # Open the template file
-    saml_template = open(template_file).read()
+    saml_template = open(template_file, encoding="utf-8").read()
 
     # Fill the values into the template and return in
     return saml_template.format(**context)
 
 
-# Sign the SAML assertion using a private key file
-def sign_assertion(xml_string, private_key):
+def sign_assertion(xml_string: str, private_key: str) -> str:
+    """
+    Sign the SAML assertion using a private key file
+    """
     # Import key file
     key = xmlsec.Key.from_file(private_key, xmlsec.KeyFormat.PEM)
 
@@ -103,10 +113,14 @@ def sign_assertion(xml_string, private_key):
     return etree.tostring(root)
 
 
-def auth(sf_url, sf_company_id, sf_oauth_client_id,
-         sf_admin_user, sf_saml_private_key):
+def auth(sf_url: str, sf_company_id: str, sf_oauth_client_id: str,
+         sf_admin_user: str, sf_saml_private_key: str) -> str:
+    """
+    Request an API access token by generating a signed SAML assertion
+    and using it to authenticate with SuccessFactors.
+    """
 
-    template_file = (impresources.files(templates) / 'sf_saml_template.xml')
+    template_file = impresources.files(templates) / 'sf_saml_template.xml'
 
     # Generate SAML assertion XML from template file
     unsigned_assertion = generate_assertion(sf_url,

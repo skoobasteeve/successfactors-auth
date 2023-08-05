@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "successfactors_auth"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
   { name="Ray Lyon", email="ray@raylyon.net" },
 ]
 description = "Authenticate to the SuccessFactors API."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",

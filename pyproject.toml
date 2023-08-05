@@ -18,5 +18,5 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/skoobasteeve/successfactors-python"
-"Bug Tracker" = "https://github.com/skoobasteeve/successfactors-python/issues"
+"Homepage" = "https://github.com/skoobasteeve/successfactors_auth"
+"Bug Tracker" = "https://github.com/skoobasteeve/successfactors_auth/issues"

@@ -42,8 +42,8 @@ from lxml import etree
 from . import templates
 
 
-def get_access_token(sf_url: str, company_id: str, client_id: str,
-                     assertion: str) -> str:
+def request_token(sf_url: str, company_id: str, client_id: str,
+                  assertion: str) -> str:
     """
     Send POST request to SuccessFactors containing the generated
     SAML assertion and other details, then receive a token in response
@@ -113,8 +113,8 @@ def sign_assertion(xml_string: str, private_key: str) -> str:
     return etree.tostring(root)
 
 
-def auth(sf_url: str, sf_company_id: str, sf_oauth_client_id: str,
-         sf_admin_user: str, sf_saml_private_key: str) -> str:
+def get_token(sf_url: str, sf_company_id: str, sf_oauth_client_id: str,
+              sf_admin_user: str, sf_saml_private_key: str) -> str:
     """
     Request an API access token by generating a signed SAML assertion
     and using it to authenticate with SuccessFactors.
@@ -135,9 +135,9 @@ def auth(sf_url: str, sf_company_id: str, sf_oauth_client_id: str,
     signed_assertion_b64 = base64.b64encode(signed_assertion).replace(b'\n', b'')
 
     # Request the API token from SuccessFactors via a POST request
-    access_token = get_access_token(sf_url,
-                                    sf_company_id,
-                                    sf_oauth_client_id,
-                                    signed_assertion_b64)
+    access_token = request_token(sf_url,
+                                 sf_company_id,
+                                 sf_oauth_client_id,
+                                 signed_assertion_b64)
 
     return access_token

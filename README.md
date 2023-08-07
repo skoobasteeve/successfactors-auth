@@ -23,22 +23,21 @@ Authenticate with the SAP SuccessFactors API with OAuth2 and Python.
 #!/usr/bin/env python
 
 import requests
-from successfactors_auth import auth as sf_auth
+import successfactors_auth as sf
 
 sf_url = 'https://your.base.url.com'
 sf_company_id = 'your-company-id'
 sf_oauth_client_id = 'your_app_client_id'
 sf_admin_user = 'your_admin_user'
-sf_saml_private_key = 'your_app_private_key.pem'
+sf_saml_private_key = 'app_private_key_file.pem'
 
-token = sf_auth.auth(
-    sf_url,
-    sf_company_id,
-    sf_oauth_client_id,
-    sf_admin_user,
-    sf_saml_private_key,
-    sf_saml_template
-    )
+token = sf.get_token(
+    sf_company_id=company_id,
+    sf_oauth_client_id=oauth_client_id,
+    sf_admin_user=admin_api_user,
+    sf_saml_private_key=oauth_private_key,
+    sf_url=url
+)
 
 headers = {
     "Accept: application/json",

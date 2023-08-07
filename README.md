@@ -10,7 +10,7 @@ Authenticate with the SAP SuccessFactors API with OAuth2 and Python.
    pip install successfactors_auth
    ```
 4. Import `successfactors_auth` into your Python >=3.9 project.
-5. Call the `successfactors_auth.auth()` function in your Python project. You'll need to pass the following parameters:
+5. Call the `successfactors_auth.get_token()` function in your Python project. You'll need to pass the following parameters:
     - `sf_url`: Base API url of your SuccessFactors instance, e.g. "https://api55.sapsf.eu".
     - `sf_company_id`: SuccessFactors company ID.
     - `sf_oauth_client_id`: The Client ID for the OAuth application you created earlier.

@@ -1,6 +1,16 @@
 # SuccessFactors Auth
 Authenticate with the SAP SuccessFactors API with OAuth2 and Python.
 
+## Dependencies
+
+- xmlsec
+- requests
+
+## System Requirements
+
+- libxml2 >= 2.9.1
+- libxmlsec1 >= 1.2.18
+
 ## How to use
 
 1. Create an OAuth application in SuccessFactors.
@@ -9,6 +19,8 @@ Authenticate with the SAP SuccessFactors API with OAuth2 and Python.
    ``` shell
    pip install successfactors_auth
    ```
+   Depending on your OS, you may need to install additional system packages, see [xmlsec documentation](https://pypi.org/project/xmlsec/).  
+   **Note for macOS users:** There is a bug that prevents you from installing xmlsec with Homebrew, currently tracked in a [Github issue](https://github.com/xmlsec/python-xmlsec/issues/254). There are some workaround you can try, but in the mean time it may be easier to install within a container or VM.
 4. Import `successfactors_auth` into your Python >=3.9 project.
 5. Call the `successfactors_auth.get_token()` function in your Python project. You'll need to pass the following parameters:
     - `sf_url`: Base API url of your SuccessFactors instance, e.g. "https://api55.sapsf.eu".

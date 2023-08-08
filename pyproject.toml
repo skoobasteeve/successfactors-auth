@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "successfactors-auth"
-version = "0.0.9"
+version = "0.0.10"
 authors = [
   { name="Ray Lyon", email="ray@raylyon.net" },
 ]
